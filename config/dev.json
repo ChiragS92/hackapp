@@ -1,0 +1,4 @@
+{
+  "port": 5000,
+	"DB_URL": "mongodb://hackapp:hackapp@ds027495.mongolab.com:27495/hackapp"
+}
