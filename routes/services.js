@@ -9,7 +9,7 @@ var router = express.Router();
   router.use(bodyParser.urlencoded({ extended: false }));
 
 var API_KEY = 'AIzaSyAlVusxxXa10M5IA0WYYf15j3OlKTINzvk';
-var API_KEY2 = 'AIzaSyAKFB32mr_VXoALb1VIS5iXqjgRxVJpXG0';
+var API_WEATHER = 'c3440697a1704cd3f19e5b07d95229a2';
 var SEARCH_API = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?radius=25000&location=';
 var GEOCODING_API = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
 var PLACE_API = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=';
@@ -20,13 +20,54 @@ function compare(a, b){
   return a.pos - b.pos;
 }
 
-function sendData(res, places){
+function sendData(res, places, contact){
   console.log("Send!!");
   places.sort(compare);
-  res.json(places);
+  var message = config.SMS_MESSAGE_1;
+  for(var i =0; i<places.length;i++){
+    message+='\n'+(i+1)+'.'+places[i].name+","+places[i].contact;
+  }
+  console.log(message);
+  var request_url = config.MSG91_URL + "authkey=" + config.MSG91_AUTH + "&mobiles=" + contact + "&message=" + message + "&sender=" + config.SMS_SENDER + "&route=" + config.SMS_ROUTE;
+  console.log(url);
+  request({
+    url: request_url,
+      method: 'GET',
+
+  }, function(error, response, body){
+    console.log(response);
+    if(error){
+      console.log('ERROR_SENDING_OTP_MOBILE' + err);
+      res.status(200).json(extend({data:'ERROR_SENDING_OTP_MOBILE'},{status:400}));
+    }
+    else if(response.statusCode == 200)
+    {
+      res.status(200).json(extend({data:'MSG_SENT_MOBILE'},{status:200}));
+    }
+    else if(response.statusCode == 207)
+    {
+      res.status(200).json(extend({data:'ERROR_AUTH_KEY_INVALID'},{status:400}));
+    }
+    else if(response.statusCode == 302)
+    {
+      res.status(200).json(extend({data:'ERROR_EXPIRED_USER_ACCOUNT'},{status:400}));
+    }
+    else if(response.statusCode == 303)
+    {
+      res.status(200).json(extend({data:'ERROR_BANNED_USER_ACCOUNT'},{status:400}));
+    }
+    else if(response.statusCode == 001)
+    {
+      res.status(200).json(extend({data:'ERROR_UNABLE_TO_CONNECT_DATABASE'},{status:400}));
+    }
+    else if(response.statusCode == 002)
+    {
+      res.status(200).json(extend({data: 'ERROR_UNABLE_TO_SELECT_DATABASE'},{status: 400}));
+    }
+  });
 }
 
-function getHospitalData(lat, long, type, res){
+function getHospitalData(lat, long, type, res, contact){
   console.log("Getting Hospital Data");
        url = SEARCH_API + lat + ',' + long + '&types=hospital|ambulance&keyword=ambulance|hospital&key=' + API_KEY;
        request({
@@ -35,15 +76,13 @@ function getHospitalData(lat, long, type, res){
            json: false,
        }, function(error, response, body){
            if(error) {
-               console.log(error);
+           console.log(error);
            res.status(200).json(extend({data: 'ERROR GETTING DATA'},{status: 400}));
            }
            else{
-             console.log("Got search data!");
+            console.log("Got search data!");
             var data = JSON.parse(body);
-            console.log(body);
                var places = [];
-               console.log(data.results.length);
                if(data.results.length === 0){
                  res.status(200).json(extend({data: 'ERROR GETTING DATA'},{status: 400}));
                }
@@ -66,12 +105,12 @@ function getHospitalData(lat, long, type, res){
                         place.id = d.result.id;
                         place.pos = count;
                         place.contact = d.result.international_phone_number;
-                        count++;
                         if(place.contact){
                           places.push(place);
+                          count++;
                         }
-                        if( count == data.results.length - 1){
-                            sendData(res,places);
+                        if( count == 5){
+                            sendData(res, places, contact);
                           }
                       }
                     }
@@ -83,7 +122,7 @@ function getHospitalData(lat, long, type, res){
             );
        }
 
-function getWeatherData(lat, long, type, res){
+function getWeatherData(lat, long, type, res, contact){
   console.log("Getting Weather Data");
 
 }
@@ -123,10 +162,10 @@ router.post('/', function(req, res){
          long = data.results[0].geometry.location.lng;
 
           if(type.toLowerCase() == 'hospital'){
-              getHospitalData(lat, long, type, res);
+              getHospitalData(lat, long, type, res, contact);
           }
           else if(type.toLowerCase() == 'weather'){
-            getWeatherData(lat, long, type, res);
+            getWeatherData(lat, long, type, res, contact);
           }
       }
     }
