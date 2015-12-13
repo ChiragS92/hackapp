@@ -22,6 +22,28 @@ function compare(a, b){
   return a.pos - b.pos;
 }
 
+function translate(message, lang, contact, res) {
+
+    request({
+        url: config.OUTPUT_TRANSLATE_API +message+ '&target='+ lang,
+        method: 'GET',
+        json: false,
+    }, function(error, response, body){
+        if(error) {
+            console.log(error);
+            res.status(200).json(extend({data: 'ERROR GETTING DATA'},{status: 400}));
+        }
+        else
+        {
+            var result = JSON.parse(body);
+            var info = result.data.translations[0].translatedText;
+            console.log(info);
+            sendData(res, info, contact);
+        }
+      });
+  }
+
+
 function sendData(res, message, contact){
   console.log("Send!!");
   var limit = message.length/130;
@@ -61,7 +83,7 @@ function sendData(res, message, contact){
       }
 }
 
-function getHospitalData(lat, long, type, res, contact){
+function getHospitalData(lat, long, type, res, contact, lang){
   console.log("Getting Hospital Data");
        url = SEARCH_API + lat + ',' + long + '&types=hospital|ambulance&keyword=ambulance|hospital&key=' + API_KEY;
        request({
@@ -109,7 +131,7 @@ function getHospitalData(lat, long, type, res, contact){
                         for(var i =0; i<places.length;i++){
                           message+=' '+(i+1)+'. '+places[i].name+","+places[i].contact;
                         }
-                            sendData(res, message, contact);
+                            translate(message, lang, contact, res);
                         }
                       }
                     }
@@ -121,7 +143,7 @@ function getHospitalData(lat, long, type, res, contact){
             );
        }
 
-function getWeatherData(lat, long, type, res, contact){
+function getWeatherData(lat, long, type, res, contact, lang){
   console.log("Getting Weather Data");
   var url = WEATHER_API + 'lat=' + lat + '&lon=' + long + '&appid=' + API_WEATHER;
   request({
@@ -146,7 +168,7 @@ function getWeatherData(lat, long, type, res, contact){
             temp_max = temp_max.substring(0,5);
             message += '\n' + date + ' : ' + desc + ',Min Temp : '+ temp_min + ',Max Temp : ' + temp_max;
           }
-          sendData(res, message, contact);
+          translate(message, lang, contact, res);
         }
   });
 }
@@ -181,6 +203,7 @@ router.post('/', function(req, res){
         {
             var result = JSON.parse(body);
             var addr = result.data.translations[0].translatedText;
+            var lang = result.data.translations[0].detectedSourceLanguage;
 //=================================================//
 
 
@@ -204,10 +227,10 @@ router.post('/', function(req, res){
              long = data.results[0].geometry.location.lng;
 
               if(type.toLowerCase() == 'hospital'){
-                  getHospitalData(lat, long, type, res, contact);
+                  getHospitalData(lat, long, type, res, contact, lang);
               }
               else if(type.toLowerCase() == 'weather'){
-                getWeatherData(lat, long, type, res, contact);
+                getWeatherData(lat, long, type, res, contact, lang);
               }
           }
         }

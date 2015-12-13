@@ -2,10 +2,11 @@
   "port": 5000,
 	"DB_URL": "mongodb://hackapp:hackapp@ds027495.mongolab.com:27495/hackapp",
 	"MSG91_AUTH": "93703AiFwbYtV0po5606f4a1",
-	"MSG91_URL": "http://api.msg91.com/api/sendhttp.php?",
+	"MSG91_URL": "http://api.msg91.com/api/sendhttp.php?unicode=1&",
   "SMS_MESSAGE_1": "Hospital : ",
   "SMS_MESSAGE_2": "Weather : ",
 	"SMS_SENDER": "HACKAP",
 	"SMS_ROUTE": 4,
-	"TRANSLATE_API": "https://www.googleapis.com/language/translate/v2?key=AIzaSyAvYQq52PRCPSDE5-3kL1B0shkq7QykI78&target=en&q="
+	"TRANSLATE_API": "https://www.googleapis.com/language/translate/v2?key=AIzaSyAvYQq52PRCPSDE5-3kL1B0shkq7QykI78&target=en&q=",
+	"OUTPUT_TRANSLATE_API": "https://www.googleapis.com/language/translate/v2?key=AIzaSyAvYQq52PRCPSDE5-3kL1B0shkq7QykI78&q="
 }
