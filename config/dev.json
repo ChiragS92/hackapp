@@ -6,5 +6,6 @@
   "SMS_MESSAGE_1": "Hospital : ",
   "SMS_MESSAGE_2": "Weather : ",
 	"SMS_SENDER": "HACKAP",
-	"SMS_ROUTE": 4
+	"SMS_ROUTE": 4,
+	"TRANSLATE_API": "https://www.googleapis.com/language/translate/v2?key=AIzaSyAvYQq52PRCPSDE5-3kL1B0shkq7QykI78&target=en&q="
 }

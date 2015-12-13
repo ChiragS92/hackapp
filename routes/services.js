@@ -166,13 +166,10 @@ router.post('/', function(req, res){
         long = 0,
         url = '';
 
-    if(address){
-      url = GEOCODING_API + address + '&key=' + API_KEY;
-      url=url.replace(' ','+');
-    }
+//=================================================//
 
     request({
-        url: url,
+        url: config.TRANSLATE_API + address,
         method: 'GET',
         json: false,
     }, function(error, response, body){
@@ -180,20 +177,43 @@ router.post('/', function(req, res){
             console.log(error);
         res.status(200).json(extend({data: 'ERROR GETTING DATA'},{status: 400}));
         }
-        else{
-         var data = JSON.parse(body);
-         lat = data.results[0].geometry.location.lat;
-         long = data.results[0].geometry.location.lng;
+        else
+        {
+            var result = JSON.parse(body);
+            var addr = result.data.translations[0].translatedText;
+//=================================================//
 
-          if(type.toLowerCase() == 'hospital'){
-              getHospitalData(lat, long, type, res, contact);
+
+        if(addr){
+          url = GEOCODING_API + addr + '&key=' + API_KEY;
+          url=url.replace(' ','+');
+        }
+
+        request({
+            url: url,
+            method: 'GET',
+            json: false,
+        }, function(error, response, body){
+            if(error) {
+                console.log(error);
+            res.status(200).json(extend({data: 'ERROR GETTING DATA'},{status: 400}));
+            }
+            else{
+             var data = JSON.parse(body);
+             lat = data.results[0].geometry.location.lat;
+             long = data.results[0].geometry.location.lng;
+
+              if(type.toLowerCase() == 'hospital'){
+                  getHospitalData(lat, long, type, res, contact);
+              }
+              else if(type.toLowerCase() == 'weather'){
+                getWeatherData(lat, long, type, res, contact);
+              }
           }
-          else if(type.toLowerCase() == 'weather'){
-            getWeatherData(lat, long, type, res, contact);
-          }
-      }
+        }
+      );
     }
-  );
+});
 });
 
 module.exports = router;
