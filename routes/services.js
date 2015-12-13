@@ -67,7 +67,7 @@ function sendData(res, message, contact){
           else if(response.statusCode == 200 && message.length<=130)
           {
             j++;
-            if(j >= limit){
+            if(j == limit+1){
               res.status(200).json(extend({data:'MSG_SENT_MOBILE'},{status:200}));
             }
           }
@@ -131,7 +131,8 @@ function getHospitalData(lat, long, type, res, contact, lang){
                         for(var i =0; i<places.length;i++){
                           message+=' '+(i+1)+'. '+places[i].name+","+places[i].contact;
                         }
-                            translate(message, lang, contact, res);
+                            //translate(message, lang, contact, res);
+                            sendData(res, message, contact);
                         }
                       }
                     }
@@ -168,7 +169,8 @@ function getWeatherData(lat, long, type, res, contact, lang){
             temp_max = temp_max.substring(0,5);
             message += '\n' + date + ' : ' + desc + ',Min Temp : '+ temp_min + ',Max Temp : ' + temp_max;
           }
-          translate(message, lang, contact, res);
+          //translate(message, lang, contact, res);
+          sendData(res, message, contact);
         }
   });
 }
