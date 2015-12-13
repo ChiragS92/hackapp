@@ -4,6 +4,7 @@
 	"MSG91_AUTH": "93703AiFwbYtV0po5606f4a1",
 	"MSG91_URL": "http://api.msg91.com/api/sendhttp.php?",
   "SMS_MESSAGE_1": "Hospital : ",
-	"SMS_SENDER": "HACKAPP",
+  "SMS_MESSAGE_2": "Weather : ",
+	"SMS_SENDER": "HACKAP",
 	"SMS_ROUTE": 4
 }
